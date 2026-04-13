@@ -1,18 +1,9 @@
-# office-deploy-script
-PowerShell script to remove old Office and install Microsoft 365 Apps (Current Channel, en-GB)
-# Microsoft Office Deployment Script
+# Office Deployment PowerShell Script
 
-✅ Remove old Office versions  
-✅ Install latest Microsoft 365 Apps  
-✅ Current Channel  
-✅ Exclude Outlook & Visio  
-✅ Language: en-GB  
-
-## Requirements
-- Windows 10 / 11
-- Run PowerShell as Administrator
+Remove old Office and install latest Microsoft 365 Apps (Current Channel, en-GB)
 
 ## Run
+Run PowerShell as Administrator:
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-.\Install-Office.ps1
+.\\Install-Office.ps1
+```
