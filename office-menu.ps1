@@ -1,6 +1,6 @@
 # =====================================================
-# Office-Menu.ps1 (FIXED)
-# Safe master menu for Remove / Install Office
+# Office-Menu.ps1 (FINAL FIX)
+# Master menu for Remove / Install Office
 # =====================================================
 
 # ---------- Admin check ----------
@@ -10,7 +10,7 @@ $IsAdmin = ([Security.Principal.WindowsPrincipal] `
 
 if (-not $IsAdmin) {
     Write-Host "Please run PowerShell as Administrator" -ForegroundColor Red
-    pause
+    Read-Host "Press ENTER to exit"
     exit 1
 }
 
@@ -23,13 +23,13 @@ $InstallScript = Join-Path $ScriptDir "Install-Office.ps1"
 # ---------- Validate script paths ----------
 if (!(Test-Path $RemoveScript)) {
     Write-Host "Remove-Office.ps1 not found in $ScriptDir" -ForegroundColor Red
-    pause
+    Read-Host "Press ENTER to exit"
     exit 1
 }
 
 if (!(Test-Path $InstallScript)) {
     Write-Host "Install-Office.ps1 not found in $ScriptDir" -ForegroundColor Red
-    pause
+    Read-Host "Press ENTER to exit"
     exit 1
 }
 
@@ -56,16 +56,22 @@ do {
             Write-Host "Launching Office Removal..." -ForegroundColor Yellow
             & "$RemoveScript"
             Write-Host ""
-            pause
+            Read-Host "Press ENTER to return to menu"
         }
         "2" {
             Write-Host ""
             Write-Host "Launching Office Installation..." -ForegroundColor Yellow
             & "$InstallScript"
             Write-Host ""
-            pause
+            Read-Host "Press ENTER to return to menu"
         }
         "0" {
             Write-Host "Exiting..." -ForegroundColor Cyan
         }
         default {
+            Write-Host "Invalid choice. Please enter 0, 1, or 2." -ForegroundColor Red
+            Start-Sleep -Seconds 2
+        }
+    }
+}
+until ($choice -eq "0")
