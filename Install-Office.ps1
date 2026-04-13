@@ -41,7 +41,7 @@ $ODT = "$Temp\setup.exe"
 $Cfg = "$Temp\config.xml"
 
 Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $ODT
-Invoke-WebRequest "https://raw.githubusercontent.com/<USERNAME>/office-deploy-script/main/config.xml" -OutFile $Cfg
+Invoke-WebRequest "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main/config.xml" -OutFile $Cfg
 
 Write-Host "Installing Microsoft 365 Apps..." -ForegroundColor Cyan
 Start-Process $ODT "/configure `"$Cfg`"" -Wait
