@@ -1,6 +1,10 @@
-$u = "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main/Office-Menu.ps1"
-$f = "$env:TEMP\Office-Menu.ps1"
+$base = "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main"
+$dir  = "$env:TEMP\OfficeDeploy"
 
-Invoke-WebRequest $u -OutFile $f
+New-Item $dir -ItemType Directory -Force | Out-Null
 
-powershell -ExecutionPolicy Bypass -File $f
+Invoke-WebRequest "$base/Office-Menu.ps1"   -OutFile "$dir\Office-Menu.ps1"
+Invoke-WebRequest "$base/Remove-Office.ps1" -OutFile "$dir\Remove-Office.ps1"
+Invoke-WebRequest "$base/Install-Office.ps1"-OutFile "$dir\Install-Office.ps1"
+
+powershell -ExecutionPolicy Bypass -File "$dir\Office-Menu.ps1"
