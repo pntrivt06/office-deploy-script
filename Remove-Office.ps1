@@ -1,12 +1,14 @@
 # =====================================================
 # Remove-Office.ps1
-# MENU-based FULL removal (0 = Exit, 1 = Remove)
-# Removes Office MSI + C2R + Outlook + Skype for Business
+# MENU 0/1 – Full Office removal
+# Removes:
+#  - Office 2019 ProPlus MSI (SaRA)
+#  - Office Click-to-Run (ODT)
+#  - Outlook AppX ONLY (KEEP Mail & Calendar)
 # =====================================================
 
 # ---------- Admin check ----------
-$IsAdmin = ([Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent()
+$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $IsAdmin) {
@@ -30,8 +32,7 @@ $C2RPath = "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration"
 $HasC2R  = Test-Path $C2RPath
 
 if (-not $Office2019MSI -and -not $HasC2R) {
-    Write-Host "✅ No Microsoft Office detected. Nothing to remove." -ForegroundColor Green
-    exit 0
+    Write-Host "✅ No Microsoft Office detected." -ForegroundColor Green
 }
 
 if ($Office2019MSI) {
@@ -46,7 +47,7 @@ if ($HasC2R) {
 Write-Host ""
 Write-Host "Select an option:"
 Write-Host "  [0] Exit (do nothing)"
-Write-Host "  [1] REMOVE Microsoft Office completely (including Outlook & Skype)"
+Write-Host "  [1] REMOVE Microsoft Office completely"
 
 # ---------- Numeric menu ----------
 do {
@@ -59,7 +60,7 @@ if ($choice -eq "0") {
 }
 
 # =====================================================
-# FULL REMOVAL STARTS HERE
+# FULL REMOVAL
 # =====================================================
 
 Write-Host ""
@@ -69,12 +70,35 @@ Write-Host "Starting FULL Office removal..." -ForegroundColor Red
 Get-Process winword,excel,powerpnt,outlook,lync,skype,officeclicktorun -ErrorAction SilentlyContinue |
 Stop-Process -Force
 
+# =====================================================
+# REMOVE OUTLOOK APPX ONLY (KEEP Mail & Calendar)
+# =====================================================
+Write-Host ""
+Write-Host "Checking for Outlook AppX (New Outlook)..." -ForegroundColor Cyan
+
+$OutlookAppx = Get-AppxPackage |
+Where-Object {
+    $_.Name -eq "Microsoft.OutlookForWindows" -or
+    $_.Name -like "*Outlook*"
+}
+
+if ($OutlookAppx) {
+    foreach ($app in $OutlookAppx) {
+        Write-Host "Removing Outlook AppX: $($app.Name)" -ForegroundColor Yellow
+        Remove-AppxPackage -Package $app.PackageFullName -ErrorAction SilentlyContinue
+    }
+    Write-Host "✅ Outlook AppX removed." -ForegroundColor Green
+}
+else {
+    Write-Host "No Outlook AppX detected." -ForegroundColor Green
+}
+
 # ---------- Working folder ----------
 $Temp = "C:\Temp\OfficeRemove"
 New-Item -ItemType Directory -Path $Temp -Force | Out-Null
 
 # =====================================================
-# REMOVE OFFICE 2019 MSI (SaRA – official)
+# REMOVE OFFICE 2019 MSI (SaRA)
 # =====================================================
 if ($Office2019MSI) {
 
@@ -93,12 +117,11 @@ else {
 }
 
 # =====================================================
-# REMOVE CLICK-TO-RUN (ALL APPS)
-# This removes Word, Excel, Outlook, Skype for Business, etc.
+# REMOVE CLICK-TO-RUN OFFICE (ALL APPS)
 # =====================================================
 if ($HasC2R) {
 
-    Write-Host "Removing Click-to-Run Office (ALL APPS)..." -ForegroundColor Cyan
+    Write-Host "Removing Click-to-Run Office (all Win32 apps)..." -ForegroundColor Cyan
 
     $ODT = "$Temp\setup.exe"
     $RemoveXML = "$Temp\Remove.xml"
@@ -121,5 +144,5 @@ else {
 
 Write-Host ""
 Write-Host "✅ OFFICE REMOVAL COMPLETED SUCCESSFULLY." -ForegroundColor Green
-Write-Host "Recommended: REBOOT the computer before installing Office again." -ForegroundColor Yellow
+Write-Host "⚠️ Recommended: REBOOT the computer before installing Office again." -ForegroundColor Yellow
 exit 0
