@@ -55,7 +55,8 @@ do {
         "1" {
             Write-Host ""
             Write-Host "Starting Office removal..." -ForegroundColor Yellow
-            & "$RemoveScript"
+            $resolved = Resolve-Path $RemoveScript -ErrorAction Stop
+            & $resolved
             Write-Host ""
             Read-Host "Press ENTER to return to menu"
         }
@@ -63,7 +64,9 @@ do {
         "2" {
             Write-Host ""
             Write-Host "Starting Office installation..." -ForegroundColor Yellow
-            & "$InstallScript"
+            $resolved = Resolve-Path $InstallScript -ErrorAction Stop
+            & $resolved
+            ``
             Write-Host ""
             Read-Host "Press ENTER to return to menu"
         }
