@@ -1,10 +1,11 @@
 # =====================================================
-# Office-Menu.ps1
-# MASTER MENU – Remove / Install Microsoft Office
+# Office-Menu.ps1 (FIXED)
+# Safe master menu for Remove / Install Office
 # =====================================================
 
 # ---------- Admin check ----------
-$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
+$IsAdmin = ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $IsAdmin) {
@@ -13,13 +14,21 @@ if (-not $IsAdmin) {
     exit 1
 }
 
-# ---------- Script paths ----------
-$BasePath = $PSScriptRoot
-$RemoveScript  = Join-Path $BasePath "Remove-Office.ps1"
-$InstallScript = Join-Path $BasePath "Install-Office.ps1"
+# ---------- Resolve script directory safely ----------
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
-if (!(Test-Path $RemoveScript) -or !(Test-Path $InstallScript)) {
-    Write-Host "Required scripts not found in current folder!" -ForegroundColor Red
+$RemoveScript  = Join-Path $ScriptDir "Remove-Office.ps1"
+$InstallScript = Join-Path $ScriptDir "Install-Office.ps1"
+
+# ---------- Validate script paths ----------
+if (!(Test-Path $RemoveScript)) {
+    Write-Host "Remove-Office.ps1 not found in $ScriptDir" -ForegroundColor Red
+    pause
+    exit 1
+}
+
+if (!(Test-Path $InstallScript)) {
+    Write-Host "Install-Office.ps1 not found in $ScriptDir" -ForegroundColor Red
     pause
     exit 1
 }
@@ -45,14 +54,14 @@ do {
         "1" {
             Write-Host ""
             Write-Host "Launching Office Removal..." -ForegroundColor Yellow
-            & $RemoveScript
+            & "$RemoveScript"
             Write-Host ""
             pause
         }
         "2" {
             Write-Host ""
             Write-Host "Launching Office Installation..." -ForegroundColor Yellow
-            & $InstallScript
+            & "$InstallScript"
             Write-Host ""
             pause
         }
@@ -60,9 +69,3 @@ do {
             Write-Host "Exiting..." -ForegroundColor Cyan
         }
         default {
-            Write-Host "Invalid choice. Please enter 0, 1, or 2." -ForegroundColor Red
-            Start-Sleep -Seconds 2
-        }
-    }
-}
-until ($choice -eq "0")
