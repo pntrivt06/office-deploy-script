@@ -2,7 +2,28 @@
 # Install-Office.ps1
 # Run directly from GitHub RAW
 # ==========================================
+#Detect Office Version
+function Get-OfficeInfo {
+    $regPath = "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration"
 
+    if (Test-Path $regPath) {
+        $reg = Get-ItemProperty $regPath
+
+        return [PSCustomObject]@{
+            Installed       = $true
+            ProductRelease  = $reg.ProductReleaseIds
+            Version         = $reg.VersionToReport
+            Channel         = $reg.UpdateChannel
+            Platform        = $reg.Platform
+            InstallPath     = $reg.InstallRoot
+        }
+    }
+    else {
+        return [PSCustomObject]@{
+            Installed      = $false
+        }
+    }
+}
 # ---- Check Admin ----
 If (-NOT ([Security.Principal.WindowsPrincipal] `
     [Security.Principal.WindowsIdentity]::GetCurrent()
