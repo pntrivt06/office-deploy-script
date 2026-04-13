@@ -1,53 +1,48 @@
+# =====================================================
 # Install-Office.ps1
-# Detect + Confirm + Install Office
+# Probe BEFORE + Verify AFTER install
+# Numeric confirmation (0 / 1)
+# =====================================================
 
-# ---- Admin check ----
-$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $IsAdmin) { Write-Host "Run PowerShell as Administrator" -ForegroundColor Red; exit 1 }
+# ---------- Admin check ----------
+$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
+).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-# ---- Detect existing Office ----
+if (-not $IsAdmin) {
+    Write-Host "Please run PowerShell as Administrator" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Probing existing Office installation..." -ForegroundColor Cyan
+
+# ---------- Detection (BEFORE) ----------
 $C2RPath = "HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration"
+$OfficeDetected = Test-Path $C2RPath
 
-if (Test-Path $C2RPath) {
-    $info = Get-ItemProperty $C2RPath
-    Write-Host "Detected installed Office:" -ForegroundColor Cyan
-    Write-Host "  Version : $($info.VersionToReport)"
-    Write-Host "  Channel : $($info.UpdateChannel)"
-    $confirm = Read-Host "Office is already installed. Do you want to REINSTALL / UPGRADE? (Y/N)"
-    if ($confirm -notmatch '^[Yy]') {
-        Write-Host "Install cancelled by user." -ForegroundColor Cyan
-        exit 0
-    }
+if ($OfficeDetected) {
+    $pre = Get-ItemProperty $C2RPath
+
+    Write-Host ""
+    Write-Host "Existing Office detected:" -ForegroundColor Yellow
+    Write-Host "  Product : $($pre.ProductReleaseIds)"
+    Write-Host "  Version : $($pre.VersionToReport)"
+    Write-Host "  Channel : $($pre.UpdateChannel)"
+    Write-Host ""
+    Write-Host "Choose an option:"
+    Write-Host "  [0] Exit"
+    Write-Host "  [1] Upgrade / Reinstall Microsoft 365 Apps"
 }
 else {
-    $confirm = Read-Host "No Office detected. Do you want to INSTALL Microsoft 365 Apps? (Y/N)"
-    if ($confirm -notmatch '^[Yy]') {
-        Write-Host "Install cancelled by user." -ForegroundColor Cyan
-        exit 0
-    }
+    Write-Host ""
+    Write-Host "No existing Office detected." -ForegroundColor Green
+    Write-Host "Choose an option:"
+    Write-Host "  [0] Exit"
+    Write-Host "  [1] Install Microsoft 365 Apps"
 }
 
-$Temp = "C:\\Temp\\OfficeInstall"
-New-Item -ItemType Directory -Path $Temp -Force | Out-Null
+# ---------- User input (numeric validation) ----------
+do {
+    $choice = Read-Host "Enter your choice (0 or 1)"
+} until ($choice -in @("0","1"))
 
-$ODT = "$Temp\\setup.exe"
-$Cfg = "$Temp\\config.xml"
-
-Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $ODT
-Invoke-WebRequest "https://raw.githubusercontent.com/USERNAME/office-deploy-script/main/config.xml" -OutFile $Cfg
-
-Write-Host "Installing Microsoft 365 Apps..." -ForegroundColor Cyan
-Start-Process $ODT "/configure `"$Cfg`"" -Wait
-
-# ---- Post-install detection ----
-if (Test-Path $C2RPath) {
-    $new = Get-ItemProperty $C2RPath
-    Write-Host "✅ Office installed successfully:" -ForegroundColor Green
-    Write-Host "  Version : $($new.VersionToReport)"
-    Write-Host "  Channel : $($new.UpdateChannel)"
-}
-else {
-    Write-Host "❌ Office installation not detected." -ForegroundColor Red
-}
-
-exit 0
+if ($choice -eq "0") {
