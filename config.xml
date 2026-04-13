@@ -1,0 +1,14 @@
+<Configuration>
+  <Remove All="TRUE" />
+  <Add OfficeClientEdition="64" Channel="Current">
+    <Product ID="O365ProPlusRetail">
+      <Language ID="en-gb" />
+      <ExcludeApp ID="Outlook" />
+      <ExcludeApp ID="Visio" />
+    </Product>
+  </Add>
+  <Property Name="ForceUpgrade" Value="TRUE" />
+  <Property Name="AutoActivate" Value="1" />
+  <Updates Enabled="TRUE" />
+  <Display Level="None" AcceptEULA="TRUE" />
+</Configuration>
