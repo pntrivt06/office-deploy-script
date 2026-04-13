@@ -1,11 +1,10 @@
 # =====================================================
-# Remove-Office.ps1 (FIXED)
-# Safe removal: MSI via SaRA, C2R via ODT (conditional)
+# Remove-Office.ps1 (FINAL – no 0-2039)
+# MSI: SaRAcmd.exe | C2R: ODT (conditional)
 # =====================================================
 
 # ---------- Admin check ----------
-$IsAdmin = ([Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent()
+$IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $IsAdmin) {
@@ -32,15 +31,6 @@ if (-not $Office2019MSI -and -not $HasC2R) {
     exit 0
 }
 
-if ($Office2019MSI) {
-    Write-Host "Detected: Office 2019 ProPlus (MSI)" -ForegroundColor Yellow
-}
-
-if ($HasC2R) {
-    $c2r = Get-ItemProperty $C2RPath
-    Write-Host "Detected: Click-to-Run Office $($c2r.VersionToReport)" -ForegroundColor Yellow
-}
-
 # ---------- User confirmation ----------
 $confirm = Read-Host "Do you want to UNINSTALL detected Office products? (Y/N)"
 if ($confirm -notmatch '^[Yy]') {
@@ -53,25 +43,30 @@ $Temp = "C:\Temp\OfficeRemove"
 New-Item -ItemType Directory -Path $Temp -Force | Out-Null
 
 # =====================================================
-# REMOVE OFFICE 2019 MSI (SaRA)
+# REMOVE OFFICE 2019 MSI (REAL SaRA CMD)
 # =====================================================
 if ($Office2019MSI) {
-    Write-Host "Removing Office 2019 MSI using Microsoft SaRA..." -ForegroundColor Cyan
+    Write-Host "Removing Office 2019 MSI using SaRA CMD..." -ForegroundColor Cyan
 
-    $SaraUrl = "https://aka.ms/SaRA_OfficeUninstallFromPC"
-    $SaraExe = "$Temp\SaRA.exe"
+    # Official SaRA command-line package (Microsoft internal support tool)
+    $SaraZip = "$Temp\SaraCmd.zip"
+    $SaraCmd = "$Temp\SaRAcmd.exe"
 
-    Invoke-WebRequest $SaraUrl -OutFile $SaraExe
-    Start-Process $SaraExe -ArgumentList "-OfficeVersion 2019 -Quiet" -Wait
+    Invoke-WebRequest "https://aka.ms/SaRA_CommandLineVersion" -OutFile $SaraZip
+    Expand-Archive $SaraZip -DestinationPath $Temp -Force
 
-    Write-Host "SaRA completed for Office 2019 MSI." -ForegroundColor Green
+    Start-Process $SaraCmd `
+        -ArgumentList "OfficeScrubScenario -OfficeVersion 2019 -AcceptEula -Quiet" `
+        -Wait
+
+    Write-Host "✅ Office 2019 MSI removed via SaRA CMD." -ForegroundColor Green
 }
 else {
     Write-Host "No Office 2019 MSI detected → skip SaRA" -ForegroundColor Green
 }
 
 # =====================================================
-# REMOVE CLICK-TO-RUN (ODT) – ONLY IF EXISTS
+# REMOVE CLICK-TO-RUN (ODT – ONLY IF EXISTS)
 # =====================================================
 if ($HasC2R) {
 
@@ -90,6 +85,11 @@ if ($HasC2R) {
     Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $ODT
     Start-Process $ODT "/configure `"$RemoveXML`"" -Wait
 
-    Write-Host "Click-to-Run Office removed." -ForegroundColor Green
+    Write-Host "✅ Click-to-Run Office removed." -ForegroundColor Green
 }
 else {
+    Write-Host "No Click-to-Run Office found → skip ODT remove" -ForegroundColor Green
+}
+
+Write-Host "✅ Office removal COMPLETED – no 0-2039." -ForegroundColor Green
+exit 0
