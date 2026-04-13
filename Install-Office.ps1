@@ -37,11 +37,14 @@ Start-Sleep -Seconds 10
 $Temp = "C:\Temp\OfficeInstall"
 New-Item -ItemType Directory -Path $Temp -Force | Out-Null
 
-$ODT = "$Temp\setup.exe"
-$Cfg = "$Temp\config.xml"
+$ODT = Join-Path $Temp "setup.exe"
+$Cfg = Join-Path $Temp "config.xml"
 
-Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $ODT
-Invoke-WebRequest "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main/config.xml" -OutFile $Cfg
+Write-Host "Downloading Office Deployment Tool..." -ForegroundColor Cyan
+Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $ODT -ErrorAction Stop
+
+Write-Host "Downloading Office configuration..." -ForegroundColor Cyan
+Invoke-WebRequest "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main/config.xml" -OutFile $Cfg -ErrorAction Stop
 
 Write-Host "Installing Microsoft 365 Apps..." -ForegroundColor Cyan
 Start-Process -FilePath $ODT `
