@@ -1,5 +1,11 @@
 <Configuration>
-  <Remove All="TRUE" />
+
+  <!-- REMOVE ALL OLD OFFICE (MSI + C2R) -->
+  <Remove All="TRUE">
+    <RemoveMSI />
+  </Remove>
+
+  <!-- INSTALL MICROSOFT 365 APPS -->
   <Add OfficeClientEdition="64" Channel="Current">
     <Product ID="O365ProPlusRetail">
       <Language ID="en-gb" />
@@ -7,6 +13,12 @@
       <ExcludeApp ID="Visio" />
     </Product>
   </Add>
+
+  <!-- FORCE UPGRADE -->
+  <Property Name="ForceUpgrade" Value="TRUE" />
+  <Property Name="AutoActivate" Value="1" />
+
   <Updates Enabled="TRUE" />
   <Display Level="None" AcceptEULA="TRUE" />
+
 </Configuration>
