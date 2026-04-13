@@ -44,7 +44,9 @@ Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $
 Invoke-WebRequest "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main/config.xml" -OutFile $Cfg
 
 Write-Host "Installing Microsoft 365 Apps..." -ForegroundColor Cyan
-Start-Process $ODT "/configure `"$Cfg`"" -Wait
+Start-Process -FilePath $ODT `
+    -ArgumentList "/configure `"$Cfg`"" `
+    -Wait
 
 # =====================================================
 # VERIFICATION
