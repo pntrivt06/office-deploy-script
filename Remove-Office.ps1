@@ -88,3 +88,38 @@ if ($Office2019MSI) {
 
     Write-Host "✅ Office 2019 MSI removed." -ForegroundColor Green
 }
+else {
+    Write-Host "No Office 2019 MSI detected → skipping SaRA" -ForegroundColor Green
+}
+
+# =====================================================
+# REMOVE CLICK-TO-RUN (ALL APPS)
+# This removes Word, Excel, Outlook, Skype for Business, etc.
+# =====================================================
+if ($HasC2R) {
+
+    Write-Host "Removing Click-to-Run Office (ALL APPS)..." -ForegroundColor Cyan
+
+    $ODT = "$Temp\setup.exe"
+    $RemoveXML = "$Temp\Remove.xml"
+
+@"
+<Configuration>
+  <Remove All="TRUE" />
+  <Display Level="None" AcceptEULA="TRUE" />
+</Configuration>
+"@ | Out-File $RemoveXML -Encoding UTF8 -Force
+
+    Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $ODT
+    Start-Process $ODT "/configure `"$RemoveXML`"" -Wait
+
+    Write-Host "✅ Click-to-Run Office removed (including Outlook & Skype)." -ForegroundColor Green
+}
+else {
+    Write-Host "No Click-to-Run Office detected → skipping ODT remove" -ForegroundColor Green
+}
+
+Write-Host ""
+Write-Host "✅ OFFICE REMOVAL COMPLETED SUCCESSFULLY." -ForegroundColor Green
+Write-Host "Recommended: REBOOT the computer before installing Office again." -ForegroundColor Yellow
+exit 0
