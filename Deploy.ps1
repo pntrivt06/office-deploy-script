@@ -22,7 +22,7 @@ $temp = "C:\\Temp\\OfficeDeploy"
 New-Item -ItemType Directory -Path $temp -Force | Out-Null
 
 Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile "$temp\\setup.exe"
-Invoke-WebRequest "https://raw.githubusercontent.com/USERNAME/office-deploy-script/main/config.xml" -OutFile "$temp\\config.xml"
+Invoke-WebRequest "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main/config.xml" -OutFile "$temp\\config.xml"
 
 Start-Process "$temp\\setup.exe" "/configure `"$temp\\config.xml`"" -Wait
 
