@@ -1,0 +1,12 @@
+<Configuration>
+  <Remove All="TRUE" />
+  <Add OfficeClientEdition="64" Channel="Current">
+    <Product ID="O365ProPlusRetail">
+      <Language ID="en-gb" />
+      <ExcludeApp ID="Outlook" />
+      <ExcludeApp ID="Visio" />
+    </Product>
+  </Add>
+  <Updates Enabled="TRUE" />
+  <Display Level="None" AcceptEULA="TRUE" />
+</Configuration>
