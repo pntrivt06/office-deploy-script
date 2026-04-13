@@ -1,22 +1,54 @@
+# ==========================================
 # Install-Office.ps1
-# Run PowerShell as Administrator
+# Run directly from GitHub RAW
+# ==========================================
 
-If (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "Please run this script as Administrator" -ForegroundColor Red
+# ---- Check Admin ----
+If (-NOT ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Host "Please run PowerShell as Administrator" -ForegroundColor Red
     exit 1
 }
 
-$WorkingDir = "$PSScriptRoot\OfficeInstall"
-$ODTExe = "$WorkingDir\setup.exe"
-$SetupURL = "https://officecdn.microsoft.com/pr/wsus/setup.exe"
-$ConfigXML = "$PSScriptRoot\config.xml"
+# ---- Variables ----
+$RepoOwner  = "pntrivt06"
+$RepoName   = "office-deploy-script"
+$Branch     = "main"
 
-If (!(Test-Path $WorkingDir)) { New-Item -ItemType Directory -Path $WorkingDir | Out-Null }
+$RawBaseUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/$Branch"
 
+$TempDir    = "C:\Temp\OfficeDeploy"
+$ODTExe     = "$TempDir\setup.exe"
+$ConfigXML  = "$TempDir\config.xml"
+$SetupURL   = "https://officecdn.microsoft.com/pr/wsus/setup.exe"
+
+# ---- Create Temp Folder ----
+If (!(Test-Path $TempDir)) {
+    New-Item -ItemType Directory -Path $TempDir | Out-Null
+}
+
+Write-Host "Working directory: $TempDir" -ForegroundColor Cyan
+
+# ---- Download config.xml from GitHub ----
+Write-Host "Downloading config.xml from GitHub..." -ForegroundColor Cyan
+Invoke-WebRequest `
+    -Uri "$RawBaseUrl/config.xml" `
+    -OutFile $ConfigXML `
+    -UseBasicParsing
+
+# ---- Download Office Deployment Tool ----
 Write-Host "Downloading Office Deployment Tool..." -ForegroundColor Cyan
-Invoke-WebRequest -Uri $SetupURL -OutFile $ODTExe
+Invoke-WebRequest `
+    -Uri $SetupURL `
+    -OutFile $ODTExe `
+    -UseBasicParsing
 
-Write-Host "Removing old Office and installing Microsoft 365 Apps..." -ForegroundColor Cyan
-Start-Process -FilePath $ODTExe -ArgumentList "/configure `"$ConfigXML`"" -Wait
+# ---- Install Office ----
+Write-Host "Removing old Office and installing Microsoft 365 Apps..." -ForegroundColor Yellow
+Start-Process `
+    -FilePath $ODTExe `
+    -ArgumentList "/configure `"$ConfigXML`"" `
+    -Wait
 
-Write-Host "Office installation completed successfully." -ForegroundColor Green
+Write-Host "✅ Office installation completed successfully." -ForegroundColor Green
