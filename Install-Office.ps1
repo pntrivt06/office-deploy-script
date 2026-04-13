@@ -46,3 +46,45 @@ do {
 } until ($choice -in @("0","1"))
 
 if ($choice -eq "0") {
+    Write-Host "Operation cancelled by user." -ForegroundColor Cyan
+    exit 0
+}
+
+# ---------- Paths ----------
+$Temp = "C:\Temp\OfficeInstall"
+New-Item -ItemType Directory -Path $Temp -Force | Out-Null
+
+$ODT = "$Temp\setup.exe"
+$Cfg = "$Temp\config.xml"
+
+# ---------- Download ODT + config ----------
+Write-Host "Downloading Office Deployment Tool..." -ForegroundColor Cyan
+Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" -OutFile $ODT
+
+Write-Host "Downloading Office configuration..." -ForegroundColor Cyan
+Invoke-WebRequest "https://raw.githubusercontent.com/<USERNAME>/office-deploy-script/main/config.xml" -OutFile $Cfg
+
+# ---------- Install ----------
+Write-Host "Installing Microsoft 365 Apps..." -ForegroundColor Cyan
+Start-Process $ODT "/configure `"$Cfg`"" -Wait
+
+# ---------- Verification (AFTER) ----------
+Write-Host "Verifying installation..." -ForegroundColor Cyan
+Start-Sleep -Seconds 5
+
+if (Test-Path $C2RPath) {
+    $post = Get-ItemProperty $C2RPath
+
+    Write-Host ""
+    Write-Host "✅ Office installation verified successfully:" -ForegroundColor Green
+    Write-Host "  Product : $($post.ProductReleaseIds)"
+    Write-Host "  Version : $($post.VersionToReport)"
+    Write-Host "  Channel : $($post.UpdateChannel)"
+    Write-Host "  Platform: $($post.Platform)"
+
+    exit 0
+}
+else {
+    Write-Host "❌ Office installation NOT detected after setup." -ForegroundColor Red
+    exit 2
+}
