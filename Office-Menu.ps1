@@ -66,7 +66,6 @@ do {
             Write-Host "Starting Office installation..." -ForegroundColor Yellow
             $resolved = Resolve-Path $InstallScript -ErrorAction Stop
             & $resolved
-            ``
             Write-Host ""
             Read-Host "Press ENTER to return to menu"
         }
