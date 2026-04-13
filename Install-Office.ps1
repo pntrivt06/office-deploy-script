@@ -43,7 +43,7 @@ if ($office.Installed) {
 }
 
 # ---- GitHub Variables ----
-$RepoOwner  = "YOUR_GITHUB_USERNAME"
+$RepoOwner  = "pntrivt06"
 $RepoName   = "office-deploy-script"
 $Branch     = "main"
 $RawBaseUrl = "https://raw.githubusercontent.com/$RepoOwner/$RepoName/$Branch"
