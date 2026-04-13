@@ -62,7 +62,7 @@ Invoke-WebRequest "https://officecdn.microsoft.com/pr/wsus/setup.exe" `
     -ErrorAction Stop
 
 Write-Host "Downloading Office configuration..." -ForegroundColor Cyan
-Invoke-WebRequest "https://raw.githubusercontent.com/<USERNAME>/office-deploy-script/main/config.xml" `
+Invoke-WebRequest "https://raw.githubusercontent.com/pntrivt06/office-deploy-script/main/config.xml" `
     -OutFile $Cfg `
     -ErrorAction Stop
 
